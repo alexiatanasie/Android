@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">s1 yt</string>
+    <string name="method_call">%1$s call</string>
+    <string name="helllo">Hello Ale!</string>
+    <string name="menu_option1">Option1</string>
+    <string name="menu_option2">Option2</string>
+</resources>
