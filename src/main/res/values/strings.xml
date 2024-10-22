@@ -1,7 +1,18 @@
 <resources>
-    <string name="app_name">s1 yt</string>
-    <string name="method_call">%1$s call</string>
-    <string name="helllo">Hello Ale!</string>
-    <string name="menu_option1">Option1</string>
-    <string name="menu_option2">Option2</string>
+    <string name="app_name">sem3</string>
+    <string name="tvLabelMovie">Please select genre of the movie</string>
+
+    <string name="TIL1">Fill in the title of the movie</string>
+    <string name="TIL2">Fill in the release date of the movie</string>
+    <string name="TIL3">fill in the profit of the movie</string>
+
+    <string name="rbNetflix">Netflix</string>
+    <string name="rnHBO">HBO</string>
+    <string name="btSave">SAVE</string>
+    <string-array name="arrayMovieGenre">
+        <item>Thriller</item>
+        <item>Comedy</item>
+        <item>Drama</item>
+        <item>Romance</item>
+    </string-array>
 </resources>
