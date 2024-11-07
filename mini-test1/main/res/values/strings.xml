@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Tanasie_Alexia_1108</string>
+    <string name="til1">Fill in the name of the pet</string>
+    <string name="til2">Fill in the age of the pet</string>
+    <string name="til3">Fill in the weight of the pet</string>
+    <string name="tv">Is the pet ready for adoption?</string>
+    <string name="rb1">Yes</string>
+    <string name="rb2">No</string>
+</resources>
