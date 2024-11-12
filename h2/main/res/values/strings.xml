@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Tanasie_Alexia_RecyclerView_h2</string>
+    <string-array name="list_city">
+        <item>Rm Valcea</item>
+        <item>Slanic</item>
+        <item>Cluj-Napoca</item>
+        <item>Pucioasa</item>
+    </string-array>
+</resources>
