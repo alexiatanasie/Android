@@ -1,5 +1,0 @@
-<resources>
-    <string name="app_name">OperationWithProgress</string>
-    <string name="down">Download</string>
-    <string name="prog">Progress: 0%</string>
-</resources>
