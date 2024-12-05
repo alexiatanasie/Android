@@ -8,74 +8,51 @@ import android.widget.ArrayAdapter;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
-
+import androidx.annotation.Nullable;
+import java.text.SimpleDateFormat;
 import java.util.List;
-
+import java.util.Locale;
 public class SchoolAdapter extends ArrayAdapter<School> {
     private int resource;
-    private List<School> schoolList;
-    private LayoutInflater layoutInflater;
-    private TextView tvMaterie,tvData,tvNota;
-    private RadioGroup rg;
-    private RadioButton rbDa, rbNu;
-
-    public SchoolAdapter(@NonNull Context context, int resource, List<School> objects, LayoutInflater layoutInflater) {
-        super(context, resource,objects);
-        this.resource=resource;
-        this.schoolList=objects;
-        this.layoutInflater = LayoutInflater.from(context);
+    private List<School> objects;
+    private LayoutInflater inflater;
+    // Visual components
+    private TextView tvMaterie, tvDataTest, tvGrade;
+    private RadioGroup radioGroupAbsolvent;
+    private RadioButton radioYes, radioNo;
+    public SchoolAdapter(@NonNull Context context, int resource, @NonNull List<School> objects, LayoutInflater inflater) {
+        super(context, resource, objects);
+        this.resource = resource;
+        this.objects = objects;
+        this.inflater = inflater;
     }
-
     @NonNull
-    public View getView(int position, View convertView, ViewGroup parent){
-        View row = convertView;
-
-        // Reuse the view if it exists; otherwise, inflate a new one
-        if (row == null) {
-            row = layoutInflater.inflate(this.resource, parent, false);
-        }
-
-        // Initialize the views
-        TextView tvMaterie = row.findViewById(R.id.tvMaterie);
-        TextView tvData = row.findViewById(R.id.tvDataTest);
-        TextView tvNota = row.findViewById(R.id.tvNota);
-        RadioGroup rg = row.findViewById(R.id.radioGroup);
-        RadioButton rbDa = row.findViewById(R.id.rbDA);
-        RadioButton rbNu = row.findViewById(R.id.rbNu);
-
-        // Get the current school object
-        School school = schoolList.get(position);
-
-        // Populate the views
-        tvMaterie.setText(school.getMaterie());
-        tvData.setText(DateConverter.fromDate(school.getDataTest()));
-        tvNota.setText(String.valueOf(school.getGrade()));
-        if (school.isAbsolvent()) {
-            rbDa.setChecked(true);
-        } else {
-            rbNu.setChecked(true);
-        }
-
+    @Override
+    public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+        View row = inflater.inflate(this.resource, parent, false);
+        initVisualComponents(row);
+        School school = objects.get(position);
+        populateVisualComponents(school);
         return row;
     }
+    private void initVisualComponents(View row) {
+        tvMaterie = row.findViewById(R.id.tvMaterie);
+        tvDataTest = row.findViewById(R.id.tvDataTest);
+        tvGrade = row.findViewById(R.id.tvGrade);
+        radioGroupAbsolvent = row.findViewById(R.id.radioGroupAbsolvent);
+        radioYes = row.findViewById(R.id.radioYes);
+        radioNo = row.findViewById(R.id.radioNo);
+    }
+    private void populateVisualComponents(School school) {
+        tvMaterie.setText(school.getMaterie());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+        tvDataTest.setText(dateFormat.format(school.getDataTest()));
+        tvGrade.setText(String.valueOf(school.getGrade()));
+        if (school.isAbsolvent()) {
+            radioYes.setChecked(true);
+        } else {
+            radioNo.setChecked(true);
+        }
+    }
 }
-//    private void initializeVisualComponents(View row){
-//        tvMaterie=row.findViewById(R.id.tvMaterie);
-//        tvData=row.findViewById(R.id.tvDataTest);
-//        tvNota=row.findViewById(R.id.tvNota);
-//        rg=row.findViewById(R.id.radioGroup);
-//        rbDa=row.findViewById(R.id.rbDA);
-//        rbNu=row.findViewById(R.id.rbNu);
-//    }
-//    private void populateVisualComponents(School school){
-//        tvMaterie.setText(school.getMaterie());
-//        tvData.setText(DateConverter.fromDate(school.getDataTest()));
-//        tvNota.setText(String.valueOf(school.getGrade()));
-//        if (school.isAbsolvent()) {
-//            rbDa.setChecked(true);
-//        } else {
-//            rbNu.setChecked(true);
-//        }
-
