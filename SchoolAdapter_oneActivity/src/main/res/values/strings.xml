@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">SchoolCustomAdapter1</string>
+    <string name="materie">Materie</string>
+    <string name="datatest">Data</string>
+    <string name="nota">Nota</string>
+    <string name="picat">Picat?</string>
+    <string name="da">DA</string>
+    <string name="nu">NU</string>
+</resources>
