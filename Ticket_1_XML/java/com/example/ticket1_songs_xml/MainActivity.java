@@ -1,6 +1,8 @@
 package com.example.ticket1_songs_xml;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.util.Xml;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -18,8 +20,12 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -37,91 +43,93 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 public class MainActivity extends AppCompatActivity {
-    public static final String songURL="https://pastebin.com/raw/qK0n6JBy";
-    Button btnSave,btnSync,btnView;
-    List<Song> songs=new ArrayList<>();
-
-    private static final String KEY_JSON="songs";
-    private static final String KEY_SONG_TITLE="songTitle";
-    private static final String KEY_ARTIST="artist";
-    private static final String KEY_NO_VIEWS="noOfViews";
-    private static final String KEY_RELEASE_DATE="songReleaseDate";
-
+    public static final String songsURL = "https://pastebin.com/raw/qK0n6JBy";
+    Button btnSave, btnSync, btnView;
+    List<Song> songs = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         initComponents();
 
-
-        //ex 4 Sync data btn ,getting over the network from ex 3 with collection
         btnSync.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                ExecutorService threadpool= Executors.newCachedThreadPool();
-                Future<List<Song>> future=threadpool.submit(new Callable<List<Song>>() {
+            public void onClick(View v) {
+                ExecutorService threadpool = Executors.newCachedThreadPool();
+                Future<List<Song>> future = threadpool.submit(new Callable<List<Song>>() {
                     @Override
                     public List<Song> call() throws Exception {
-                        List<Song>songs=new ArrayList<>();
-                        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-                        DocumentBuilder builder = factory.newDocumentBuilder();
-                        Document document = builder.parse(new URL(songURL).openStream());
-                        document.getDocumentElement().normalize();
+                        List<Song> songs = new ArrayList<>();
+                        HttpURLConnection conn = null;
 
-                        NodeList nodeList = document.getElementsByTagName("song");
 
-                        for (int i = 0; i < nodeList.getLength(); i++) {
-                            Node node = nodeList.item(i);
+                        try {
+                            conn = (HttpURLConnection) new URL(songsURL).openConnection();
+                            InputStream inputStream = conn.getInputStream();
+                            XmlPullParser parser = Xml.newPullParser();
+                            parser.setInput(inputStream, "UTF-8");
 
-                            if (node.getNodeType() == Node.ELEMENT_NODE) {
-                                Element element = (Element) node;
 
-                                String title = element.getElementsByTagName("songTitle").item(0).getTextContent();
-                                String artist = element.getElementsByTagName("artist").item(0).getTextContent();
-                                int noOfViews = Integer.parseInt(element.getElementsByTagName("noOfViews").item(0).getTextContent());
-                                Date date = DateConverter.fromString(element.getElementsByTagName("songReleaseDate").item(0).getTextContent());
+                            String text = "";
+                            Song song = null;
 
-                                Song song = new Song(title, artist, noOfViews, date);
-                                songs.add(song);
+
+                            int eventType = parser.getEventType();
+                            while (eventType != XmlPullParser.END_DOCUMENT) {
+                                String tagName = parser.getName();
+                                switch (eventType) {
+                                    case XmlPullParser.START_TAG:
+                                        if ("song".equalsIgnoreCase(tagName)) {
+                                            song = new Song();
+                                        }
+                                        break;
+                                    case XmlPullParser.TEXT:
+                                        text = parser.getText();
+                                        break;
+                                    case XmlPullParser.END_TAG:
+                                        if (song == null) break;
+                                        if ("song".equalsIgnoreCase(tagName)) {
+                                            songs.add(song);
+                                        } else if ("songTitle".equalsIgnoreCase(tagName)) {
+                                            song.setSongTitle(text);
+                                        } else if ("artist".equalsIgnoreCase(tagName)) {
+                                            song.setArtist(text);
+                                        } else if ("noOfViews".equalsIgnoreCase(tagName)) {
+                                            song.setNoOfViews(Integer.parseInt(text));
+                                        } else if ("songReleaseDate".equalsIgnoreCase(tagName)) {
+                                            song.setSongReleaseDate(DateConverter.fromString(text));
+                                        }
+                                        break;
+                                }
+                                eventType = parser.next();
+                            }
+                        } catch (IOException | XmlPullParserException e) {
+                            Log.e("Error", "Error parsing XML: " + e.getMessage());
+                        } finally {
+                            if (conn != null) {
+                                conn.disconnect(); // Ensure connection is always closed
                             }
                         }
                         return songs;
                     }
                 });
 
-                //ex 5 Toast with messages
+
                 try {
+                    songs = future.get();
                     threadpool.shutdown();
-
-                    songs=future.get();
-                    if(songs.size()==2){
-                        Toast.makeText(getApplicationContext(),"SUCCESS",Toast.LENGTH_LONG).show();
-
-                    }
-                    else{
-                        Toast.makeText(getApplicationContext(),"FAILURE",Toast.LENGTH_LONG).show();
+                    if (songs.size() == 2) {
+                        Toast.makeText(getApplicationContext(), "SUCCESS, artist name: " + songs.get(0).getArtist(), Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(getApplicationContext(), "FAILURE", Toast.LENGTH_LONG).show();
                     }
                 } catch (ExecutionException | InterruptedException e) {
+
                     throw new RuntimeException(e);
                 }
-
             }
         });
-
-        //ex 6 save btn
-        btnSave.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                SongsDAO dao=SongsDB.getInstance(getApplicationContext()).getSongsDao();
-                for(Song song: songs){
-                    dao.insertSong(song);
-                }
-                Toast.makeText(MainActivity.this,"database successfully inserted",Toast.LENGTH_LONG).show();
-            }
-        });
-        //btn View (7) to open a new activity
         btnView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -129,10 +137,13 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
     }
-    private void initComponents(){
-        btnSave=findViewById(R.id.btnSave);
-        btnSync=findViewById(R.id.btnSync);
-        btnView=findViewById(R.id.btnView);
+
+
+    private void initComponents() {
+        btnSave = findViewById(R.id.btnSave);
+        btnSync = findViewById(R.id.btnSync);
+        btnView = findViewById(R.id.btnView);
     }
 }
