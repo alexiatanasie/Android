@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Ticket3_Booking_XML</string>
+    <string name="save">Save data</string>
+    <string name="sync">Sync data</string>
+    <string name="view">View data</string>
+    <string name="sort">Sort</string>
+
+</resources>
